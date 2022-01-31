@@ -1,0 +1,20 @@
+{
+    "firestore": {
+        "rules": "firestore.rules",
+        "indexes": "firestore.indexes.json"
+    },
+    "hosting": {
+        "site": "maps-management-system",
+        "rewrites": [
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ],
+        "public": "public",
+        "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    },
+    "storage": {
+        "rules": "storage.rules"
+    }
+}
