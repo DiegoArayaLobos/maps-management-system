@@ -1,80 +1,135 @@
+import MailOutline from '@mui/icons-material/MailOutline';
 import MapaLogin from "../../../svg/MapaLogin";
-import { connect } from "react-redux";
-import { signIn } from "../../../store/actions/mapsActions";
-import { ChangeEvent, useState } from "react";
-import { LoginStyled } from "./LoginStyled";
+import Key from '@mui/icons-material/Key';
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { signIn, signOut } from "../../../store/actions/mapsActions";
+import { InputAdornment } from "@mui/material";
+import { LoginStyled, Main, Input, ButtonStyled } from "./LoginStyled";
+import { Dispatch } from 'redux';
 
-interface LoginInterface {
-    authError: any;
-    signIn: (user: string, password: string) => void;
+interface InputValue {
+    target: {
+        value: string
+    }
 }
 
-const Login = (props: LoginInterface) => {
-    const { authError, signIn } = props;
-    let codeError = authError !== null && authError.code;
-    const [user, setUser] = useState<string>("");
+const Login = () => {
+    const dispatch: Dispatch<any> = useDispatch();
+    const authError: { message?: string; code?: string | null} = useSelector((state: any) => state.maps.authError);
+    
+    const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const [validate, setValidate] = useState<boolean>(false);
-    const handleUser = (e: ChangeEvent) => {
-        const target = e.target as HTMLInputElement;
-        setUser(target.value);
-    };
-    const handlePassword = (e: ChangeEvent) => {
-        const target = e.target as HTMLInputElement;
-        setPassword(target.value);
-    };
-    const handlesubmit = () => {
-        let error: boolean = false;
-        setValidate(true);
-        if (user.length === 0) {
-            error = true;
+    const [emailValidate, setEmailValidate] = useState<string>("");
+    const [passwordValidate, setPasswordValidate] = useState<string>("");
+    const [authMessage, setAuthMessage] = useState<string>("");
+
+    const handleUser = ({target: {value}}: InputValue) => setEmail(value);
+    const handlePassword = ({target: {value}}: InputValue) => setPassword(value);
+
+    const handleSignIn = (email: string, password: string) => dispatch(signIn(email, password));
+    const handleSignOut = () => dispatch(signOut());
+
+    const handleEmailValidate: () => string = () => {
+        if(email.length === 0) {
+            return "Coloque un email";
         }
-        if (password.length === 0) {
-            error = true;
+        if(email.trim() === "") {
+            return "Coloque un email correcto";
         }
-        if (!error) {
-            signIn(user, password);
+        if(!String(email)
+        .toLowerCase()
+        .match(
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        )) {
+            return "Coloque un email correcto";
+        }
+        return "";
+    }
+
+    const handlePasswordValidate: () => string = () => {
+        if(password.length < 6) {
+            return "Coloque una contraseña correcta";
+        }
+        return "";
+    }
+
+    const handleSubmit = () => {
+        setAuthMessage("");
+        if (handleEmailValidate().length === 0 && handlePasswordValidate().length === 0) {
+            setEmailValidate(handleEmailValidate());
+            setPasswordValidate(handlePasswordValidate());
+            handleSignIn(email, password);
+        } else {
+            setEmailValidate(handleEmailValidate());
+            setPasswordValidate(handlePasswordValidate());
         }
     };
-    return (
+
+    useEffect(() => {
+        let code = authError?.code;
+        switch(code) {
+            case "auth/wrong-password":
+                setAuthMessage("Email y/o password incorrectos.");
+                break;
+            case "auth/user-not-found":
+                setAuthMessage("Email y/o password incorrectos.");
+                break;
+            default:
+                break;
+        }
+    }, [authError])
+
+    return(
         <>
             <LoginStyled>
-                <div className="container">
-                    <div className="section">
-                        <MapaLogin />
-                    </div>
-                    <div className="section">
-                        <input value={user} type="text" className={`${validate && user.length === 0 ? "validate" : ""} ${codeError === "auth/user-not-found" ? "validate" : ""}`} onChange={handleUser} />
-                        <label htmlFor="user" className={`${user.length > 0 ? "animation" : ""} ${validate && user.length === 0 ? "validate" : ""} ${codeError === "auth/user-not-found" ? "validate" : ""}`}>
-                            {`Usuario ${codeError === "auth/user-not-found" ? " / Posible error" : ""}`}
-                        </label>
-                    </div>
-                    <div className="section">
-                        <input value={password} type="password" className={`${validate && password.length === 0 ? "validate" : ""} ${codeError === "auth/user-not-found" ? "validate" : ""}`} onChange={handlePassword} />
-                        <label htmlFor="password" className={`${password.length > 0 ? "animation" : ""} ${validate && password.length === 0 ? "validate" : ""} ${codeError === "auth/user-not-found" ? "validate" : ""}`}>
-                            {`Contraseña ${codeError === "auth/user-not-found" ? " / Posible error" : ""}`}
-                        </label>
-                    </div>
-                    <div className="section">
-                        <button onClick={handlesubmit}>Ingresar</button>
-                    </div>
-                    <div className="section">{/* <span>Olvido su contraseña?</span> */}</div>
-                </div>
+                <Main elevation={4}>
+                    <MapaLogin className="logo" />
+                    <Input 
+                        error={emailValidate.length > 0 || authMessage !== ""}
+                        helperText={emailValidate}
+                        id="email"
+                        value={email}
+                        type="email" 
+                        label="Email" 
+                        variant="standard" 
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <MailOutline />
+                                </InputAdornment>
+                            ),
+                        }}
+                        onChange={handleUser}
+                    />
+                    <Input 
+                        error={passwordValidate.length > 0 || authMessage !== ""}
+                        helperText={passwordValidate}
+                        id="password"
+                        value={password} 
+                        type="password"
+                        label="Contraseña" 
+                        variant="standard" 
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Key />
+                                </InputAdornment>
+                            ),
+                        }}
+                        onChange={handlePassword}
+                    />
+                    <span className="authMessage">
+                        {
+                            authMessage
+                        }
+                    </span>
+                    <ButtonStyled variant="contained" onClick={handleSubmit}>Ingresar</ButtonStyled>
+                    {/* <ButtonStyled variant="contained" onClick={handleSignOut}>Cerrar Sesión</ButtonStyled> */}
+                </Main>
             </LoginStyled>
         </>
     );
-};
+}
 
-const mapStateToProps = (state: any) => {
-    return {
-        authError: state.maps.authError,
-    };
-};
-
-const mapDispatchToProps = (dispatch: any) => {
-    return {
-        signIn: (user: string, password: string) => dispatch(signIn(user, password)),
-    };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default Login;

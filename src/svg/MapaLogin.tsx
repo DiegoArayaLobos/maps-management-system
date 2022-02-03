@@ -1,6 +1,9 @@
-const Observatorio = () => {
+interface logo {
+    className: string;
+}
+const Logo = (props: logo) => {
     return (
-        <svg id="MMS" enableBackground="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512" xmlns="http://www.w3.org/2000/svg">
+        <svg id="MMS" enableBackground="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512" xmlns="http://www.w3.org/2000/svg" className={props.className}>
             <g>
                 <path d="m437.677 0h-280.774l-8.403 7.5-8.113-7.5h-24.773l-107.388 24.774v288.785c0 13.682 11.092 24.774 24.774 24.774h404.677l23.37-8.011c.913-2.582 1.405-5.363 1.405-8.258v-70.904l-6.952-17.16 6.952-6.194v-161.741l-6.452-8.065 6.452-8.452v-24.774c0-13.682-11.092-24.774-24.775-24.774z" fill="#ffe07d" />
                 <path d="m49.548 330.323c-18.243 0-33.032-14.789-33.032-33.032v-194.791l-16.516 13.113v24.774l5.667 8.613-5.667 7.903v66.065l5.667 8.364-5.667 8.152v82.58c0 13.682 11.092 24.774 24.774 24.774h24.774l8.119-5.838 8.398 5.839h371.612c10.771 0 19.957-6.916 23.37-16.516z" fill="#E8CA4F" />
@@ -32,4 +35,4 @@ const Observatorio = () => {
     );
 };
 
-export default Observatorio;
+export default Logo;
